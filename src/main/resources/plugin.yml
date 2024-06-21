@@ -1,0 +1,13 @@
+name: dCoinflip
+main: com.dynamored.coinflip.Coinflip
+version: 1.0.0
+api-version: 1.19
+author: DynamoRed
+description: Coinflip plugin for HelloMinecraft
+depends: [Vault]
+
+commands:
+  coinflips:
+    aliases: ["cfs", "cfgames"]
+  coinflip:
+    aliases: ["cf", "cfgame"]

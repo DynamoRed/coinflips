@@ -1,0 +1,5 @@
+coinflip:
+  maxSimultaneousGamesPerPlayer: 5
+  amountPerGame:
+    max: 100000
+    min: 10
