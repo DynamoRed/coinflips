@@ -30,7 +30,7 @@ public class HelpCommand implements CommandExecutor {
 
 			gamesBaseComponent.addExtra(tryComponent);
 
-			TextComponent gameBaseComponent = new TextComponent(" §6§l→ §eCreate a new coinflip game: §f/coinflip create §7<amount>");
+			TextComponent gameBaseComponent = new TextComponent(" §6§l→ §eCreate a new coinflip game: §f/coinflip create §7<amount> ");
 
 			tryComponent = new TextComponent("§d[Try]");
 			tryComponent.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/coinflip create 10"));
