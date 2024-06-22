@@ -1,13 +1,15 @@
 package com.dynamored.coinflip.commands;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,18 +21,44 @@ import com.dynamored.coinflip.models.CoinflipGame;
 import com.dynamored.coinflip.utils.Head;
 import com.dynamored.coinflip.utils.ItemBuilder;
 
-public class GamesCommand implements CommandExecutor {
+public class GamesCommand implements TabExecutor {
+
+	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+		if(args.length == 1) {
+			return Arrays.asList("<page>", "help");
+		} else if (args.length == 2) {
+			if (sender instanceof Player && args[0].equalsIgnoreCase("create")) {
+				Player player = (Player) sender;
+				player.playSound(player, Sound.UI_BUTTON_CLICK, .5f, 1);
+				return Arrays.asList("<amount>");
+			}
+		}
+
+		return Collections.emptyList();
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+		label = label.toLowerCase();
+		for (int i = 0; i < args.length; i++) args[i] = args[i].toLowerCase();
+
 		if (sender instanceof Player){
 			Player player = (Player) sender;
+
+			List<String> subcommands = Arrays.asList("create", "join", "cancel", "help");
+			if (args.length >= 1 && subcommands.contains(args[0])) {
+				player.performCommand("coinflip " + args[0] + " " + (args.length >= 2 ? args[1] : ""));
+				return true;
+			}
+
 			int page = args.length == 1 ? Integer.parseInt(args[0]) : 1;
 
 			List<CoinflipGame> games = GameManager.getWaitingGames();
 
 			int perPage = 21;
 			int maxPage = (games.size() + perPage - 1) / perPage;
+			if (maxPage <= 1) maxPage = 1;
 			if (page <= 1) page = 1;
 			if (page > maxPage) page = maxPage;
 

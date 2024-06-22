@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dynamored.coinflip.commands.GameCommand;
 import com.dynamored.coinflip.commands.GamesCommand;
+import com.dynamored.coinflip.commands.HelpCommand;
 import com.dynamored.coinflip.events.InventoryClickEvent;
 import com.dynamored.coinflip.events.PlayerJoinEvent;
 import com.dynamored.coinflip.events.PlayerQuitEvent;
@@ -185,6 +186,7 @@ public class Coinflip extends JavaPlugin {
 	private void _setupCommands() {
 		getCommand("coinflips").setExecutor(new GamesCommand());
 		getCommand("coinflip").setExecutor(new GameCommand());
+		getCommand("coinfliphelp").setExecutor(new HelpCommand());
 	}
 
     public static Economy getEconomy() {

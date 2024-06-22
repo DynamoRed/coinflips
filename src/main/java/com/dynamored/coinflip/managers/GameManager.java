@@ -1,6 +1,7 @@
 package com.dynamored.coinflip.managers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,8 @@ public class GameManager {
 		for (CoinflipGame game : Coinflip.getInstance().games.values()) {
 			if (game.getStatus() == GameStatus.WAITING) filteredGames.add(game);
 		}
+
+		Collections.sort(filteredGames);
 
 		return filteredGames;
 	}

@@ -16,7 +16,7 @@ import com.dynamored.coinflip.managers.AnimationManager;
 import com.dynamored.coinflip.utils.Fireworks;
 import com.dynamored.coinflip.utils.ItemBuilder;
 
-public class CoinflipGame {
+public class CoinflipGame implements Comparable<CoinflipGame> {
 
 	public static int sessionsCount = 1;
 
@@ -63,6 +63,11 @@ public class CoinflipGame {
 		this.winner = winner;
 		this.sessionId = sessionId;
     }
+
+	@Override
+	public int compareTo(CoinflipGame game) {
+		return this.getSessionId() - game.getSessionId();
+	}
 
 	public UUID getId() {
 		return id;

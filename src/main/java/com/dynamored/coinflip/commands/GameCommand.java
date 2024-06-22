@@ -28,7 +28,7 @@ public class GameCommand implements TabExecutor {
 
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		if(args.length == 1) {
-			return Arrays.asList("create");
+			return Arrays.asList("create", "help");
 		} else if (args.length == 2) {
 			if (sender instanceof Player && args[0].equalsIgnoreCase("create")) {
 				Player player = (Player) sender;
@@ -49,17 +49,25 @@ public class GameCommand implements TabExecutor {
 		if (sender instanceof Player){
 			Player player = (Player) sender;
 
+			if (args.length == 0) {
+				player.performCommand("coinflips");
+				return true;
+			}
+
 			if (args.length == 1) {
 				switch (args[0]) {
 					case "create":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /coinflip create <amount>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " create <amount>");
 						return false;
 					case "join":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /coinflip join <gameId>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " join <gameId>");
 						return false;
 					case "cancel":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /coinflip cancel <gameId>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " cancel <gameId>");
 						return false;
+					case "help":
+						player.performCommand("cfhelp");
+						return true;
 					default:
 						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Unknown subcommand");
 						return false;

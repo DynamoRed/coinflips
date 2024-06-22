@@ -10,4 +10,6 @@ commands:
   coinflips:
     aliases: ["cfs", "cfgames"]
   coinflip:
-    aliases: ["cf", "cfgame"]
+    aliases: ["cf", "cfgame", "pileouface", "pf"]
+  coinfliphelp:
+    aliases: ["cfhelp", "pfhelp"]
