@@ -114,6 +114,7 @@ public class Coinflip extends JavaPlugin {
 					int sessionId = section.getConfigurationSection(id).getInt("sessionId");
 
 					CoinflipGame game = new CoinflipGame(
+						UUID.fromString(id),
 						Bukkit.getOfflinePlayer(UUID.fromString(creator)),
 						amount,
 						GameStatus.valueOf(state),
@@ -143,6 +144,7 @@ public class Coinflip extends JavaPlugin {
 					boolean refunded = section.getConfigurationSection(id).getBoolean("refunded");
 
 					CoinflipGameRefund gameRefund = new CoinflipGameRefund(
+						UUID.fromString(id),
 						Bukkit.getOfflinePlayer(UUID.fromString(player)),
 						amount,
 						UUID.fromString(game),

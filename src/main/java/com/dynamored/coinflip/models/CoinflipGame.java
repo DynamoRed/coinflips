@@ -20,7 +20,7 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 
 	public static int sessionsCount = 1;
 
-	private final UUID id = UUID.randomUUID();
+	private final UUID id;
 	private int sessionId = -1;
 	private final OfflinePlayer creator;
     private OfflinePlayer opponent;
@@ -30,32 +30,13 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 	private Inventory menu;
 
     public CoinflipGame(OfflinePlayer creator, double amount) {
+		this.id = UUID.randomUUID();
         this.creator = creator;
         this.amount = amount;
     }
 
-    public CoinflipGame(OfflinePlayer creator, double amount, GameStatus status) {
-        this.creator = creator;
-        this.amount = amount;
-		this.status = status;
-    }
-
-    public CoinflipGame(OfflinePlayer creator, double amount, GameStatus status, OfflinePlayer opponent) {
-        this.creator = creator;
-        this.amount = amount;
-		this.status = status;
-		this.opponent = opponent;
-    }
-
-    public CoinflipGame(OfflinePlayer creator, double amount, GameStatus status, OfflinePlayer opponent, GameWinner winner) {
-        this.creator = creator;
-        this.amount = amount;
-		this.status = status;
-		this.opponent = opponent;
-		this.winner = winner;
-    }
-
-    public CoinflipGame(OfflinePlayer creator, double amount, GameStatus status, OfflinePlayer opponent, GameWinner winner, int sessionId) {
+    public CoinflipGame(UUID id, OfflinePlayer creator, double amount, GameStatus status, OfflinePlayer opponent, GameWinner winner, int sessionId) {
+		this.id = id;
         this.creator = creator;
         this.amount = amount;
 		this.status = status;

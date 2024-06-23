@@ -10,19 +10,21 @@ import com.dynamored.coinflip.Coinflip;
 
 public class CoinflipGameRefund {
 
-	private final UUID id = UUID.randomUUID();
+	private final UUID id;
 	private final UUID gameId;
 	private final OfflinePlayer player;
     private final double amount;
 	private boolean refunded = false;
 
     public CoinflipGameRefund(OfflinePlayer player, double amount, UUID gameId) {
+		this.id = UUID.randomUUID();
         this.player = player;
 		this.amount = amount;
 		this.gameId = gameId;
     }
 
-    public CoinflipGameRefund(OfflinePlayer player, double amount, UUID gameId, boolean refunded) {
+    public CoinflipGameRefund(UUID id, OfflinePlayer player, double amount, UUID gameId, boolean refunded) {
+		this.id = id;
         this.player = player;
 		this.amount = amount;
 		this.gameId = gameId;
