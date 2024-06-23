@@ -22,25 +22,25 @@ public class HelpCommand implements CommandExecutor {
 		if (sender instanceof Player){
 			Player player = (Player) sender;
 
-			TextComponent gamesBaseComponent = new TextComponent(" §6§l→ §eView currently available coinflip games: §f/coinflips ");
+			TextComponent gamesBaseComponent = new TextComponent(" §6§l→ §e" + Coinflip.getInstance().translate(player.getLocale(), "_View_Coinflips_Command_Description_", null) + ": §f/coinflips ");
 
-			TextComponent tryComponent = new TextComponent("§d[Try]");
+			TextComponent tryComponent = new TextComponent("§d[" + Coinflip.getInstance().translate(player.getLocale(), "_Try_", null) + "]");
 			tryComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coinflips"));
-			tryComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("See available games")));
+			tryComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Coinflip.getInstance().translate(player.getLocale(), "_View_Coinflips_Command_Hover_", null))));
 
 			gamesBaseComponent.addExtra(tryComponent);
 
-			TextComponent gameBaseComponent = new TextComponent(" §6§l→ §eCreate a new coinflip game: §f/coinflip create §7<amount> ");
+			TextComponent gameBaseComponent = new TextComponent(" §6§l→ §e" + Coinflip.getInstance().translate(player.getLocale(), "_Create_Coinflip_Command_Description_", null) + ": §f/coinflip create §7<amount> ");
 
-			tryComponent = new TextComponent("§d[Try]");
+			tryComponent = new TextComponent("§d[" + Coinflip.getInstance().translate(player.getLocale(), "_Try_", null) + "]");
 			tryComponent.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/coinflip create 10"));
-			tryComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Create a new coinflip game")));
+			tryComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Coinflip.getInstance().translate(player.getLocale(), "_Create_Coinflip_Command_Hover_", null))));
 
 			gameBaseComponent.addExtra(tryComponent);
 
 			player.sendMessage(
 				"",
-				Coinflip.getInstance().prefix + "§7[§d☄§7] §fHelp Menu",
+				Coinflip.getInstance().prefix + "§7[§d☄§7] §f" + Coinflip.getInstance().translate(player.getLocale(), "_Help_Menu_", null),
 				""
 			);
 

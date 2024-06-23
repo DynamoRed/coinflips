@@ -1,6 +1,9 @@
 package com.dynamored.coinflip.models;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -8,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -117,17 +121,15 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 		Coinflip.getEconomy().withdrawPlayer(this.getCreator(), this.getAmount());
 		Coinflip.getEconomy().withdrawPlayer(this.getOpponent(), this.getAmount());
 
-		String startMessage = Coinflip.getInstance().prefix + "§7[§a☄§7] §f" + this.getCreator().getPlayer().getDisplayName() + "§7's game §f#" + this.getSessionId() + " §7has begun";
-		String startWithdrawMessage = Coinflip.getInstance().prefix + "§7[§b☄§7] §6" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural() + " §7have been withdraw from your wallet and placed awaiting the outcome of the game";
-
-		this.sendPlayersMessage(startMessage, startWithdrawMessage);
+		this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§a☄§7] ", "_Start_Message_");
+		this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§a☄§7] ", "_Start_Message_Withdraw_");
 
 		Random random = new Random();
         int winnerNumber = random.nextInt(2);
 
 		this.setWinner(winnerNumber == 0 ? GameWinner.CREATOR : GameWinner.OPPONENT);
 
-		this.setMenu(Bukkit.createInventory(null, 9, "§7[§4☄§7] §4Bet: §l§c" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural()));
+		this.setMenu(Bukkit.createInventory(null, 9, "§7[§4☄§7] §f#" + this.getSessionId() + " §7- §4" + Coinflip.getInstance().translate(this.getCreator().getPlayer().getLocale(), "_Bet_", null) + ": §l§c" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural()));
 
 		for (int i = 0; i < 9; i++) {
 			ItemBuilder builder = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
@@ -150,17 +152,22 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 		OfflinePlayer looserPlayer = this.getWinner() == GameWinner.CREATOR ? this.getOpponent() : this.getCreator();
 
 		if (!winnerPlayer.isOnline() || !looserPlayer.isOnline()) {
-			this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§e☄§7] Your opponent is offline");
+			this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§e☄§7] ", "_Offline_Opponent_");
 			return this.cancel();
 		}
 
 		Coinflip.getEconomy().depositPlayer(winnerPlayer, this.getAmount()*2);
 		Fireworks.summon(winnerPlayer.getPlayer().getLocation());
 
-		winnerPlayer.getPlayer().closeInventory();
-		looserPlayer.getPlayer().closeInventory();
+		for (Player online : Bukkit.getOnlinePlayers()) {
+			online.sendMessage(Coinflip.getInstance().prefix + "§7[§d☄§7] " + Coinflip.getInstance().translate(online.getLocale(), "_Won_Game_Broadcast_", new HashMap<String, String>() {{
+				put("winnerName", winnerPlayer.getPlayer().getDisplayName());
+				put("looserName", looserPlayer.getPlayer().getDisplayName());
+				put("amount", String.valueOf(getAmount() * 2));
+				put("currency", Coinflip.getEconomy().currencyNamePlural());
+			}}));
+		}
 
-		Bukkit.broadcastMessage(Coinflip.getInstance().prefix + "§7[§d☄§7] §6" + winnerPlayer.getPlayer().getDisplayName() + " §7won a game against §f" + looserPlayer.getPlayer().getDisplayName() + " §7and won §6" + (this.getAmount() * 2) + " " + Coinflip.getEconomy().currencyNamePlural() + " §7!");
 		this.setStatus(GameStatus.ENDED);
 
 		return this.save();
@@ -180,15 +187,34 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 			if (this.getOpponent().isOnline()) this.getOpponent().getPlayer().closeInventory();
 		}
 
-		this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§e☄§7] Your game §f#" + this.getSessionId() + " §7has been canceled");
+		this.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§e☄§7] ", "_Game_Cancelled_");
 		this.setStatus(GameStatus.CANCELED);
 
 		return this.save();
 	}
 
 	public void sendPlayersMessage(String ...message) {
-		if (this.getCreator().isOnline()) this.getCreator().getPlayer().sendMessage(message);
-		if (this.getOpponent() != null && this.getOpponent().isOnline()) this.getOpponent().getPlayer().sendMessage(message);
+		List<OfflinePlayer> receivers = new ArrayList<>();
+
+		if (this.getCreator().isOnline()) receivers.add(this.getCreator());
+		if (this.getOpponent() != null && this.getOpponent().isOnline()) receivers.add(this.getOpponent());
+
+		for (OfflinePlayer player : receivers) {
+			List<String> finals = new ArrayList<>();
+
+			for (String messageComponent : message) {
+				if (messageComponent.startsWith("_") && messageComponent.endsWith("_")) {
+					finals.add(Coinflip.getInstance().translate(player.getPlayer().getLocale(), messageComponent, new HashMap<String, String>() {{
+						put("playerName", player.getPlayer().getDisplayName());
+						put("gameId", String.valueOf(getSessionId()));
+						put("amount", String.valueOf(getAmount()));
+						put("currency", Coinflip.getEconomy().currencyNamePlural());
+					}}));
+				} else finals.add(messageComponent);
+			}
+
+			player.getPlayer().sendMessage(String.join("", finals));
+		}
 	}
 
 	public boolean save() {

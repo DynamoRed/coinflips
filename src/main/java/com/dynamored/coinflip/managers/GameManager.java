@@ -60,7 +60,7 @@ public class GameManager {
 
         int n = 50;
 
-        ItemStack itemA = new ItemBuilder(new Head(null, "§c" + creator.getDisplayName(), "", creator).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(creator).getItemStack();
+        ItemStack itemA = new ItemBuilder(new Head(null, "§e" + creator.getDisplayName(), "", creator).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(creator).getItemStack();
         ItemStack itemB = new ItemBuilder(new Head(null, "§b" + opponent.getDisplayName(), "", opponent).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(opponent).getItemStack();
 
         for (int i = 0; i < n; i++) {

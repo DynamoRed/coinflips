@@ -24,8 +24,8 @@ public class InventoryClickEvent implements Listener {
 			if (container.has(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN) && container.get(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN))
 				event.setCancelled(true);
 
-			if (event.getView().getTitle().startsWith("§7[§d☄§7] §5Coinflips")) {
-				Player player = (Player) event.getWhoClicked();
+			Player player = (Player) event.getWhoClicked();
+			if (event.getView().getTitle().startsWith("§7[§d☄§7] §5" + Coinflip.getInstance().translate(player.getLocale(), "_Coinflips_", null))) {
 
 				if (container.has(Coinflip.getInstance().nbtCoinflipsMenuPage, PersistentDataType.INTEGER)) {
 					event.setCancelled(true);

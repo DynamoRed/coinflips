@@ -2,6 +2,7 @@ package com.dynamored.coinflip.commands;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class GameCommand implements TabExecutor {
 			if (sender instanceof Player && args[0].equalsIgnoreCase("create")) {
 				Player player = (Player) sender;
 				player.playSound(player, Sound.UI_BUTTON_CLICK, .5f, 1);
-				return Arrays.asList("<amount>");
+				return Arrays.asList(Coinflip.getInstance().translate(player.getLocale(), "_Amount_", null));
 			}
 		}
 
@@ -57,19 +58,19 @@ public class GameCommand implements TabExecutor {
 			if (args.length == 1) {
 				switch (args[0]) {
 					case "create":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " create <amount>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Usage_", null) + ": /" + label + " create <amount>");
 						return false;
 					case "join":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " join <gameId>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Usage_", null) + ": /" + label + " join <gameId>");
 						return false;
 					case "cancel":
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] Usage: /" + label + " cancel <gameId>");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§b☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Usage_", null) + ": /" + label + " cancel <gameId>");
 						return false;
 					case "help":
 						player.performCommand("cfhelp");
 						return true;
 					default:
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Unknown subcommand");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Unknown_Subcommand_", null));
 						return false;
 				}
 			}
@@ -82,35 +83,35 @@ public class GameCommand implements TabExecutor {
 						if (amount <= 0 || amount < Coinflip.getInstance().getConfiguration().minAmountPerGame || amount > Coinflip.getInstance().getConfiguration().maxAmountPerGame) throw new InvalidAmountRangeException();
 
 						if (!Coinflip.getEconomy().has(player, amount)) {
-							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You do not have enough money in your bank account");
+							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Not_Enough_Money_", null));
 							return false;
 						}
 
 						if (GameManager.getPlayerWaitingGames(player.getUniqueId()).size() >= Coinflip.getInstance().getConfiguration().maxSimultaneousGamesPerPlayer) {
-							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You have reached the maximum number of simultaneous games allowed");
+							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Max_Simultaneous_Games_", null));
 							return false;
 						}
 
 						CoinflipGame game = new CoinflipGame(player, amount);
 						game.save();
 
-						TextComponent baseComponent = new TextComponent(Coinflip.getInstance().prefix + "§7[§d☄§7] §f" + player.getDisplayName() + " §7created a new coinflip for §6" + game.getAmount() + " " + Coinflip.getEconomy().currencyNamePlural() + " §7! ");
-
-						TextComponent joinComponent = new TextComponent("§a[Join]");
-						joinComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coinflip join " + game.getId()));
-						joinComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to join !")));
-
-						baseComponent.addExtra(joinComponent);
-
-						TextComponent baseCreatorComponent = new TextComponent(Coinflip.getInstance().prefix + "§7[§a☄§7] You have just created a new coinflip, wait for an opponent to join for the game to start. ");
-
-						TextComponent cancelComponent = new TextComponent("§c[Cancel]");
-						cancelComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coinflip cancel " + game.getId()));
-						cancelComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to cancel")));
-
-						baseCreatorComponent.addExtra(cancelComponent);
-
 						for (Player online : Bukkit.getOnlinePlayers()) {
+							TextComponent baseComponent = new TextComponent(Coinflip.getInstance().prefix + "§7[§d☄§7] " + Coinflip.getInstance().translate(online.getLocale(), "_Created_New_Game_", new HashMap<String, String>() {{ put("playerName", player.getDisplayName()); put("amount", String.valueOf(game.getAmount())); put("currency", Coinflip.getEconomy().currencyNamePlural()); }}) + " ");
+
+							TextComponent joinComponent = new TextComponent("§a[" + Coinflip.getInstance().translate(online.getLocale(), "_Join_", null) + "]");
+							joinComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coinflip join " + game.getId()));
+							joinComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Coinflip.getInstance().translate(online.getLocale(), "_Click_To_Join_", null))));
+
+							baseComponent.addExtra(joinComponent);
+
+							TextComponent baseCreatorComponent = new TextComponent(Coinflip.getInstance().prefix + "§7[§a☄§7] " + Coinflip.getInstance().translate(online.getLocale(), "_Created_New_Game_Waiting_Opponent_", null) + " ");
+
+							TextComponent cancelComponent = new TextComponent("§c[" + Coinflip.getInstance().translate(online.getLocale(), "_Cancel_", null) + "]");
+							cancelComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coinflip cancel " + game.getId()));
+							cancelComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Coinflip.getInstance().translate(online.getLocale(), "_Cannot_Cancel_", null))));
+
+							baseCreatorComponent.addExtra(cancelComponent);
+
 							if (online.getUniqueId().equals(player.getUniqueId())) online.spigot().sendMessage(baseCreatorComponent);
 							else online.spigot().sendMessage(baseComponent);
 						}
@@ -118,10 +119,10 @@ public class GameCommand implements TabExecutor {
 						Coinflip.getInstance().colorStr("§aCreating game " + game.getId().toString());
 
 					} catch (NumberFormatException e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Invalid amount");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Amount_", null));
 						return false;
 					} catch (InvalidAmountRangeException e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Amount must be a positive number, between " + Coinflip.getInstance().getConfiguration().minAmountPerGame + " and " + Coinflip.getInstance().getConfiguration().maxAmountPerGame);
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Amount_Range_", new HashMap<String, String>() {{ put("minAmount", String.valueOf(Coinflip.getInstance().getConfiguration().minAmountPerGame)); put("maxAmount", String.valueOf(Coinflip.getInstance().getConfiguration().maxAmountPerGame)); put("currency", Coinflip.getEconomy().currencyNamePlural()); }}) + " ");
 						return false;
 					}
 				} else if (args[0].equalsIgnoreCase("join")) {
@@ -131,25 +132,25 @@ public class GameCommand implements TabExecutor {
 						CoinflipGame game = GameManager.getById(id);
 						if (game != null) {
 							if (!Coinflip.getEconomy().has(player, game.getAmount())) {
-								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You do not have enough money in your bank account");
+								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Not_Enough_Money_", null));
 								return false;
 							}
 
 							if (game.getCreator().getUniqueId().equals(player.getUniqueId())) {
-								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You cannot join your own game");
+								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Cannot_Join_Own_", null));
 								return false;
 							}
 
 							game.start(player);
 						} else {
-							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Invalid game ID");
+							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Game_Id_", null));
 							return false;
 						}
 					} catch (IllegalArgumentException e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Invalid game ID");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Game_Id_", null));
 						return false;
 					} catch (IllegalGameStart e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] This game has started or is canceled, you cannot join it");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Game_Started_Cannot_Join_", null));
 						return false;
 					}
 				} else if (args[0].equalsIgnoreCase("cancel")) {
@@ -161,22 +162,22 @@ public class GameCommand implements TabExecutor {
 							if (game.getCreator().getUniqueId().equals(player.getUniqueId())) {
 								game.cancel();
 							} else {
-								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You are not the creator of this game, you cannot cancel it");
+								sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Not_Creator_Cannot_Cancel_", null));
 								return false;
 							}
 						} else {
-							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Invalid game ID");
+							sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Game_Id_", null));
 							return false;
 						}
 					} catch (IllegalArgumentException e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Invalid game ID");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Invalid_Game_Id_", null));
 						return false;
 					} catch (IllegalGameCancellation e) {
-						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] You cannot cancel this game");
+						sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Cannot_Cancel_", null));
 						return false;
 					}
 				} else {
-					sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] Unknown command arguments");
+					sender.sendMessage(Coinflip.getInstance().prefix + "§7[§c☄§7] " + Coinflip.getInstance().translate(player.getLocale(), "_Unknown_Args_", null));
 					return false;
 				}
 			}

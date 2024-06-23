@@ -1,9 +1,11 @@
 package com.dynamored.coinflip;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -24,7 +26,9 @@ import com.dynamored.coinflip.models.CoinflipGameRefund;
 import com.dynamored.coinflip.models.GameStatus;
 import com.dynamored.coinflip.models.GameWinner;
 import com.dynamored.coinflip.models.IllegalGameCancellation;
+import com.dynamored.coinflip.models.Lang;
 import com.dynamored.coinflip.utils.Config;
+import com.dynamored.coinflip.utils.Translation;
 
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
@@ -38,6 +42,8 @@ public class Coinflip extends JavaPlugin {
 	public YamlConfiguration gamesConfig;
 	public File gamesRefundsFile;
 	public YamlConfiguration gamesRefundsConfig;
+
+	private HashMap<Lang, Translation> translations = new HashMap<>();
 
 	private Config config = new Config();
     private static Economy economy = null;
@@ -128,6 +134,7 @@ public class Coinflip extends JavaPlugin {
 						try {
 							game.cancel();
 						} catch (IllegalGameCancellation e) {
+							e.printStackTrace();
 							colorStr("§l§c/!!!\\ CANNOT REFUND CORRECTLY for game " + game.getId());
 						}
 					}
@@ -169,6 +176,21 @@ public class Coinflip extends JavaPlugin {
 
 	private void _setupFiles() {
 		saveDefaultConfig();
+		saveResource("langs/fr_fr.json", true);
+		saveResource("langs/en_us.json", true);
+
+		try {
+			File enTranslationFile = new File(this.getDataFolder() + File.separator + "langs", "en_us.json");
+			Translation enTranslation = new Translation(enTranslationFile);
+			this.translations.put(Lang.EN, enTranslation);
+
+			File frTranslationFile = new File(this.getDataFolder() + File.separator + "langs", "fr_fr.json");
+			Translation frTranslation = new Translation(frTranslationFile);
+			this.translations.put(Lang.FR, frTranslation);
+		} catch (IOException e) {
+			e.printStackTrace();
+			colorStr("§l§c/!!!\\ Failed to load translations");
+		}
 
 		this.gamesFile = new File(this.getDataFolder(), "games.yml");
 		files.add(this.gamesFile);
@@ -197,5 +219,20 @@ public class Coinflip extends JavaPlugin {
 
     public Config getConfiguration() {
         return this.config;
+    }
+
+	public String translate(String locale, String key, Map<String, String> placeholders) {
+		Lang lang = Lang.findByLabel(locale);
+
+		if (!this.translations.containsKey(lang)) lang = Lang.EN;
+
+        String translation = this.translations.get(lang).getTranslation(key).toString();
+
+		if (placeholders != null) {
+			for (Map.Entry<String, String> entry : placeholders.entrySet())
+				translation = translation.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
+
+        return translation;
     }
 }

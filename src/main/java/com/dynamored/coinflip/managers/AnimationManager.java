@@ -1,5 +1,7 @@
 package com.dynamored.coinflip.managers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Instrument;
@@ -17,7 +19,9 @@ import com.dynamored.coinflip.models.GameStatus;
 import com.dynamored.coinflip.models.GameWinner;
 import com.dynamored.coinflip.models.IllegalGameCancellation;
 import com.dynamored.coinflip.models.IllegalGameEnd;
+import com.dynamored.coinflip.utils.Head;
 import com.dynamored.coinflip.utils.ItemBuilder;
+import com.dynamored.coinflip.utils.Maths;
 
 public class AnimationManager {
 
@@ -28,7 +32,12 @@ public class AnimationManager {
 	private int ticks = 0;
 	private int endCounter = 0;
 
-	private List<ItemStack> items;
+	private final List<Material> glasses = Arrays.asList(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Material.YELLOW_STAINED_GLASS_PANE, Material.LIME_STAINED_GLASS_PANE, Material.RED_STAINED_GLASS_PANE, Material.PINK_STAINED_GLASS_PANE);
+	private int resultsMaterialsCounter = 0;
+	private ItemStack winnerHead;
+
+
+	private List<ItemStack> items = new ArrayList<>();
 
 	public void animateMenu(CoinflipGame game) {
 		if (!game.getCreator().isOnline() || !game.getOpponent().isOnline()) return;
@@ -36,7 +45,30 @@ public class AnimationManager {
 		Player creator = game.getCreator().getPlayer();
 		Player opponent = game.getOpponent().getPlayer();
 
-		items = GameManager.generateHeads(creator, game.getOpponent().getPlayer(), game.getWinner());
+		for (int i = 0; i < 9; i++) {
+			ItemBuilder builder = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+			items.add(builder.getItemStack());
+		}
+
+		items.addAll(GameManager.generateHeads(creator, game.getOpponent().getPlayer(), game.getWinner()));
+
+		List<List<Material>> resultsMaterials = new ArrayList<>();
+
+		for (int i = 0; i < 20; i++) {
+			List<Material> resultsCombinaison = new ArrayList<>();
+			Material lastMaterial = Material.BLACK_STAINED_GLASS_PANE;
+
+			for (int y = 0; y < 9; y++) {
+				Material pane = lastMaterial;
+				while (pane.toString().equalsIgnoreCase(lastMaterial.toString())) pane = glasses.get(Maths.random(0, glasses.size(), true));
+				lastMaterial = pane;
+				resultsCombinaison.add(pane);
+			}
+
+			resultsMaterials.add(resultsCombinaison);
+		}
+
+		winnerHead = new ItemBuilder(new Head(null, "§6§l" + (game.getWinner() == GameWinner.CREATOR ? creator.getDisplayName() : opponent.getDisplayName()), "", game.getWinner() == GameWinner.CREATOR ? creator : opponent).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(game.getWinner() == GameWinner.CREATOR ? creator : opponent).getItemStack();
 
         new BukkitRunnable() {
             @Override
@@ -46,24 +78,37 @@ public class AnimationManager {
                     this.cancel();
 
 					game.getMenu().clear();
-					game.getMenu().setItem(4, items.get(game.getWinner() == GameWinner.CREATOR ? 0 : 1));
 
 					new BukkitRunnable() {
 						@Override
 						public void run() {
-							if (endCounter == 7) {
+							if (endCounter == 15) {
 								try {
 									this.cancel();
+
+									for (int i = 0; i < 9; i++) {
+										ItemBuilder builder = new ItemBuilder(Material.ORANGE_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+										if (i != 4) game.getMenu().setItem(i, builder.getItemStack());
+									}
+
 									game.end();
+
+									return;
 								} catch (IllegalGameEnd | IllegalGameCancellation e) {
-									game.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§d☄§7] An error occurred during your game §f#" + game.getSessionId());
+									game.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§d☄§7] ", "_Error_During_Game_");
 								}
 							}
 
+							List<Material> panes = resultsMaterials.get(resultsMaterialsCounter);
+
 							for (int i = 0; i < 9; i++) {
-								ItemBuilder builder = new ItemBuilder(endCounter % 2 == 0 ? Material.GRAY_STAINED_GLASS_PANE : Material.ORANGE_STAINED_GLASS_PANE).setDisplayName("§6" + (game.getWinner() == GameWinner.CREATOR ? creator : opponent).getDisplayName() + " §6§lVICTORY !").addLore("§c" + (game.getAmount()*2) + Coinflip.getEconomy().currencyNameSingular()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+								ItemBuilder builder = new ItemBuilder(panes.get(i)).setDisplayName("§6" + (game.getWinner() == GameWinner.CREATOR ? creator : opponent).getDisplayName() + " §6§lVICTORY !").addLore("§c" + (game.getAmount()*2) + Coinflip.getEconomy().currencyNamePlural()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
 								if (i != 4) game.getMenu().setItem(i, builder.getItemStack());
+								else game.getMenu().setItem(i, winnerHead);
 							}
+
+							resultsMaterialsCounter += 1;
+							if (resultsMaterialsCounter >= resultsMaterials.size()) resultsMaterialsCounter = 0;
 
 							switch (endCounter) {
 								case 0:

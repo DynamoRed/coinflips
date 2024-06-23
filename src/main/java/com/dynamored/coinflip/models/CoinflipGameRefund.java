@@ -1,6 +1,7 @@
 package com.dynamored.coinflip.models;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
@@ -55,7 +56,10 @@ public class CoinflipGameRefund {
 		if (this.isRefunded() || !this.getPlayer().isOnline()) return false;
 
 		Coinflip.getEconomy().depositPlayer(this.getPlayer(), this.getAmount());
-		this.getPlayer().getPlayer().sendMessage(Coinflip.getInstance().prefix + "§7[§a☄§7] You have been refunded §6" + this.getAmount() + " " + Coinflip.getEconomy().currencyNamePlural() + " §7for an interrupted coinflip game");
+		this.getPlayer().getPlayer().sendMessage(Coinflip.getInstance().prefix + "§7[§a☄§7] " + Coinflip.getInstance().translate(this.getPlayer().getPlayer().getLocale(), "_Refunded_For_Game_", new HashMap<String, String>() {{
+			put("amount", String.valueOf(getAmount()));
+			put("currency", Coinflip.getEconomy().currencyNamePlural());
+		}}));
 
 		this.refunded = true;
 		return this.save();

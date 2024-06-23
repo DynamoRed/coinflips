@@ -30,7 +30,7 @@ public class GamesCommand implements TabExecutor {
 			if (sender instanceof Player && args[0].equalsIgnoreCase("create")) {
 				Player player = (Player) sender;
 				player.playSound(player, Sound.UI_BUTTON_CLICK, .5f, 1);
-				return Arrays.asList("<amount>");
+				return Arrays.asList(Coinflip.getInstance().translate(player.getLocale(), "_Amount_", null));
 			}
 		}
 
@@ -62,7 +62,7 @@ public class GamesCommand implements TabExecutor {
 			if (page <= 1) page = 1;
 			if (page > maxPage) page = maxPage;
 
-			Inventory coinflipsMenu = Bukkit.createInventory(null, 27, "§7[§d☄§7] §5Coinflips §8[" + page + "/" + maxPage + "]");
+			Inventory coinflipsMenu = Bukkit.createInventory(null, 27, "§7[§d☄§7] §5" + Coinflip.getInstance().translate(player.getLocale(), "_Coinflips_", null) + " §8[" + page + "/" + maxPage + "]");
 
 			ItemStack buffer = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).getItemStack();
 			coinflipsMenu.setItem(0, buffer);
@@ -72,12 +72,12 @@ public class GamesCommand implements TabExecutor {
 			coinflipsMenu.setItem(26, buffer);
 
 			if (page > 1)
-				coinflipsMenu.setItem(9, new ItemBuilder(new Head("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWYxMzNlOTE5MTlkYjBhY2VmZGMyNzJkNjdmZDg3YjRiZTg4ZGM0NGE5NTg5NTg4MjQ0NzRlMjFlMDZkNTNlNiJ9fX0=", "§e◀ Previous Page", "").getHead()).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenuPage, PersistentDataType.INTEGER, page-1).getItemStack());
+				coinflipsMenu.setItem(9, new ItemBuilder(new Head("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWYxMzNlOTE5MTlkYjBhY2VmZGMyNzJkNjdmZDg3YjRiZTg4ZGM0NGE5NTg5NTg4MjQ0NzRlMjFlMDZkNTNlNiJ9fX0=", "§e◀ " + Coinflip.getInstance().translate(player.getLocale(), "_Previous_Page_", null), "").getHead()).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenuPage, PersistentDataType.INTEGER, page-1).getItemStack());
 			else
 				coinflipsMenu.setItem(9, buffer);
 
 			if (games.size() > perPage * page)
-				coinflipsMenu.setItem(17, new ItemBuilder(new Head("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTNmYzUyMjY0ZDhhZDllNjU0ZjQxNWJlZjAxYTIzOTQ3ZWRiY2NjY2Y2NDkzNzMyODliZWE0ZDE0OTU0MWY3MCJ9fX0=", "§eNext Page ▶", "").getHead()).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenuPage, PersistentDataType.INTEGER, page+1).getItemStack());
+				coinflipsMenu.setItem(17, new ItemBuilder(new Head("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTNmYzUyMjY0ZDhhZDllNjU0ZjQxNWJlZjAxYTIzOTQ3ZWRiY2NjY2Y2NDkzNzMyODliZWE0ZDE0OTU0MWY3MCJ9fX0=", "§e" + Coinflip.getInstance().translate(player.getLocale(), "_Next_Page_", null) + " ▶", "").getHead()).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenuPage, PersistentDataType.INTEGER, page+1).getItemStack());
 			else
 				coinflipsMenu.setItem(17, buffer);
 
@@ -86,8 +86,8 @@ public class GamesCommand implements TabExecutor {
 
 			for (CoinflipGame game : games) {
 				if (idx >= perPage * (page - 1) && idx < perPage * page && game.getCreator().isOnline()) {
-					String name = "§6" + game.getCreator().getPlayer().getDisplayName() + "§7's game §f#" + game.getSessionId();
-					List<String> lores = Arrays.asList("", "§7§l❁ §7Bet: §6" + game.getAmount() + " " + Coinflip.getEconomy().currencyNameSingular(), player.getUniqueId().equals(game.getCreator().getUniqueId()) ? "§7Cancel: §c[Right Click]" : "§7Join: §a[Left Click]");
+					String name = Coinflip.getInstance().translate(player.getLocale(), "_Player_Game_", Collections.singletonMap("playerName", game.getCreator().getPlayer().getDisplayName())) + " §f#" + game.getSessionId();
+					List<String> lores = Arrays.asList("", "§7§l❁ §7" + Coinflip.getInstance().translate(player.getLocale(), "_Bet_", null) + ": §6" + game.getAmount() + " " + Coinflip.getEconomy().currencyNamePlural(), player.getUniqueId().equals(game.getCreator().getUniqueId()) ? "§7" + Coinflip.getInstance().translate(player.getLocale(), "_Cancel_", null) + ": §c[" + Coinflip.getInstance().translate(player.getLocale(), "_Right_Click_", null) + "]" : "§7" + Coinflip.getInstance().translate(player.getLocale(), "_Join_", null) + ": §a[" + Coinflip.getInstance().translate(player.getLocale(), "_Left_Click_", null) + "]");
 					coinflipsMenu.setItem(slot, new ItemBuilder(new Head(null, name, game.getCreator().getPlayer()).getHead()).addLore(lores).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenu, PersistentDataType.STRING, game.getId().toString()).addItemNbt(Coinflip.getInstance().nbtCoinflipsMenuIsOwner, PersistentDataType.BOOLEAN, player.getUniqueId().equals(game.getCreator().getUniqueId())).getItemStack());
 					slot++;
 					if (slot == 8) slot = 10;
