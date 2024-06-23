@@ -38,5 +38,8 @@
 	"_Game_Cancelled_": "Votre partie §f#{gameId} §7a été annulée",
 	"_Won_Game_Broadcast_": "§6{winnerName} §7a gagné une partie contre §f{looserName} §7et a gagné la somme de §6{amount}{currency} §7!",
 	"_Start_Message_": "§7La partie §f#{gameId} §7de §f{playerName} §7a commencé",
-	"_Start_Message_Withdraw_": "§6{amount}{currency} §7ont été retirés de votre compte en banque et placés en attendant le résultat de la partie"
+	"_Start_Message_Withdraw_": "§6{amount}{currency} §7ont été retirés de votre compte en banque et placés en attendant le résultat de la partie",
+	"_Winner_": "Gagnant",
+	"_You_Winner_": "Vous avez gagné 🎉",
+	"_You_Looser_": "Vous avez perdu ☹"
 }

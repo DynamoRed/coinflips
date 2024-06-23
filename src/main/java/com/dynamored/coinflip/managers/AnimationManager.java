@@ -8,7 +8,9 @@ import org.bukkit.Instrument;
 import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Note.Tone;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -46,8 +48,16 @@ public class AnimationManager {
 		Player opponent = game.getOpponent().getPlayer();
 
 		for (int i = 0; i < 9; i++) {
-			ItemBuilder builder = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+			ItemBuilder builder = new ItemBuilder(Material.LIGHT_BLUE_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
 			items.add(builder.getItemStack());
+		}
+
+		for (int i = 0; i < 27; i++) {
+			ItemBuilder builder = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+			if (i == 4 || i == 22) game.setItemForBothMenus(i, new ItemBuilder(Material.GOLD_INGOT).setDisplayName("§6§l" + (i == 4 ? "⬇" : "⬆")).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).getItemStack());
+			else game.setItemForBothMenus(i, builder.getItemStack());
+
+			if (i == 8) i = 17;
 		}
 
 		items.addAll(GameManager.generateHeads(creator, game.getOpponent().getPlayer(), game.getWinner()));
@@ -68,7 +78,11 @@ public class AnimationManager {
 			resultsMaterials.add(resultsCombinaison);
 		}
 
-		winnerHead = new ItemBuilder(new Head(null, "§6§l" + (game.getWinner() == GameWinner.CREATOR ? creator.getDisplayName() : opponent.getDisplayName()), "", game.getWinner() == GameWinner.CREATOR ? creator : opponent).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(game.getWinner() == GameWinner.CREATOR ? creator : opponent).getItemStack();
+		OfflinePlayer winnerPlayer = game.getWinner() == GameWinner.CREATOR ? creator : opponent;
+		OfflinePlayer looserPlayer = game.getWinner() == GameWinner.CREATOR ? opponent : creator;
+
+		Inventory winnerMenu = game.getWinner() == GameWinner.CREATOR ? game.getCreatorMenu() : game.getOpponentMenu();
+		Inventory looserMenu = game.getWinner() == GameWinner.CREATOR ? game.getOpponentMenu() : game.getCreatorMenu();
 
         new BukkitRunnable() {
             @Override
@@ -76,35 +90,48 @@ public class AnimationManager {
 				if (game.getStatus() == GameStatus.CANCELED) this.cancel();
 				else if (currentIndex >= items.size() - 9) {
                     this.cancel();
-
-					game.getMenu().clear();
-
 					new BukkitRunnable() {
 						@Override
 						public void run() {
-							if (endCounter == 15) {
+							if (endCounter == 0) {
+								winnerHead = new ItemBuilder(new Head(null, "§6§l" + Coinflip.getInstance().translate(winnerPlayer.getPlayer().getLocale(), "_Winner_", null) + " §f" + winnerPlayer.getPlayer().getDisplayName(), "", winnerPlayer.getPlayer()).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(winnerPlayer.getPlayer()).getItemStack();
+								winnerMenu.setItem(13, winnerHead);
+								winnerHead = new ItemBuilder(new Head(null, "§6§l" + Coinflip.getInstance().translate(looserPlayer.getPlayer().getLocale(), "_Winner_", null) + " §f" + winnerPlayer.getPlayer().getDisplayName(), "", winnerPlayer.getPlayer()).getHead()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true).setSkullOwner(winnerPlayer.getPlayer()).getItemStack();
+								looserMenu.setItem(13, winnerHead);
+
+								endCounter++;
+								return;
+							}
+
+							if (endCounter == 7) {
 								try {
-									this.cancel();
-
-									for (int i = 0; i < 9; i++) {
-										ItemBuilder builder = new ItemBuilder(Material.ORANGE_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
-										if (i != 4) game.getMenu().setItem(i, builder.getItemStack());
-									}
-
 									game.end();
-
-									return;
 								} catch (IllegalGameEnd | IllegalGameCancellation e) {
 									game.sendPlayersMessage(Coinflip.getInstance().prefix + "§7[§d☄§7] ", "_Error_During_Game_");
 								}
 							}
 
+							if (endCounter == 15) {
+								this.cancel();
+
+								for (int i = 0; i < 9; i++) {
+									ItemBuilder builder = new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).setDisplayName("§a" + Coinflip.getInstance().translate(winnerPlayer.getPlayer().getLocale(), "_You_Winner_", null)).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+									if (i != 4) winnerMenu.setItem(9+i, builder.getItemStack());
+								}
+
+								return;
+							}
+
 							List<Material> panes = resultsMaterials.get(resultsMaterialsCounter);
 
 							for (int i = 0; i < 9; i++) {
-								ItemBuilder builder = new ItemBuilder(panes.get(i)).setDisplayName("§6" + (game.getWinner() == GameWinner.CREATOR ? creator : opponent).getDisplayName() + " §6§lVICTORY !").addLore("§c" + (game.getAmount()*2) + Coinflip.getEconomy().currencyNamePlural()).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
-								if (i != 4) game.getMenu().setItem(i, builder.getItemStack());
-								else game.getMenu().setItem(i, winnerHead);
+								ItemBuilder builder = new ItemBuilder(Material.RED_STAINED_GLASS_PANE).setDisplayName("§c" + Coinflip.getInstance().translate(looserPlayer.getPlayer().getLocale(), "_You_Looser_", null)).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+								if (i != 4) looserMenu.setItem(9+i, builder.getItemStack());
+							}
+
+							for (int i = 0; i < 9; i++) {
+								ItemBuilder builder = new ItemBuilder(panes.get(i)).setDisplayName("§a" + Coinflip.getInstance().translate(winnerPlayer.getPlayer().getLocale(), "_You_Winner_", null)).addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
+								if (i != 4) winnerMenu.setItem(9+i, builder.getItemStack());
 							}
 
 							resultsMaterialsCounter += 1;
@@ -152,11 +179,9 @@ public class AnimationManager {
 
 				if (ticks%delay != 0) return;
 
-				game.getMenu().clear();
-
 				for (int i = 0; i < 9; i++) {
                     int itemIndex = (currentIndex + i) % items.size();
-                    game.getMenu().setItem(i, items.get(itemIndex));
+                    game.setItemForBothMenus(9+i, items.get(itemIndex));
                 }
 
 				creator.playNote(creator.getLocation(), Instrument.XYLOPHONE, Note.flat(1, Tone.C));

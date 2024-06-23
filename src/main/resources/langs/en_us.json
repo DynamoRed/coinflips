@@ -39,5 +39,8 @@
 	"_Game_Cancelled_": "Your game §f#{gameId} §7has been canceled",
 	"_Won_Game_Broadcast_": "§6{winnerName} §7won a game against §f{looserName} §7and won §6{amount}{currency} §7!",
 	"_Start_Message_": "§f{playerName}§7's game §f#{gameId} §7has begun",
-	"_Start_Message_Withdraw_": "§6{amount}{currency} §7have been withdraw from your wallet and placed awaiting the outcome of the game"
+	"_Start_Message_Withdraw_": "§6{amount}{currency} §7have been withdraw from your wallet and placed awaiting the outcome of the game",
+	"_Winner_": "Winner",
+	"_You_Winner_": "You are the winner 🎉",
+	"_You_Looser_": "You are the loser ☹"
 }

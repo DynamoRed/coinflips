@@ -13,6 +13,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import com.dynamored.coinflip.Coinflip;
@@ -31,7 +32,8 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
     private GameWinner winner = GameWinner.NONE;
     private final double amount;
     private GameStatus status = GameStatus.WAITING;
-	private Inventory menu;
+	private Inventory creatorMenu;
+	private Inventory opponentMenu;
 
     public CoinflipGame(OfflinePlayer creator, double amount) {
 		this.id = UUID.randomUUID();
@@ -78,8 +80,12 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
         return amount;
     }
 
-    public Inventory getMenu() {
-        return menu;
+    public Inventory getCreatorMenu() {
+        return creatorMenu;
+    }
+
+    public Inventory getOpponentMenu() {
+        return opponentMenu;
     }
 
     public GameStatus getStatus() {
@@ -102,8 +108,12 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
         this.status = status;
     }
 
-    private void setMenu(Inventory menu) {
-        this.menu = menu;
+    private void setCreatorMenu(Inventory menu) {
+        this.creatorMenu = menu;
+    }
+
+    private void setOpponentMenu(Inventory menu) {
+        this.opponentMenu = menu;
     }
 
     private void setSessionId(int sessionId) {
@@ -129,21 +139,27 @@ public class CoinflipGame implements Comparable<CoinflipGame> {
 
 		this.setWinner(winnerNumber == 0 ? GameWinner.CREATOR : GameWinner.OPPONENT);
 
-		this.setMenu(Bukkit.createInventory(null, 9, "§7[§4☄§7] §f#" + this.getSessionId() + " §7- §4" + Coinflip.getInstance().translate(this.getCreator().getPlayer().getLocale(), "_Bet_", null) + ": §l§c" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural()));
+		this.setCreatorMenu(Bukkit.createInventory(null, 27, "§7[§d☄§7] §8#" + this.getSessionId() + " §7- §5" + Coinflip.getInstance().translate(this.getCreator().getPlayer().getLocale(), "_Bet_", null) + ": §6" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural()));
+		this.setOpponentMenu(Bukkit.createInventory(null, 27, "§7[§d☄§7] §8#" + this.getSessionId() + " §7- §5" + Coinflip.getInstance().translate(this.getOpponent().getPlayer().getLocale(), "_Bet_", null) + ": §6" + this.getAmount() + Coinflip.getEconomy().currencyNamePlural()));
 
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 27; i++) {
 			ItemBuilder builder = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setDisplayName("§0▉").addItemNbt(Coinflip.getInstance().nbt, PersistentDataType.BOOLEAN, true);
-			this.getMenu().setItem(i, builder.getItemStack());
+			this.setItemForBothMenus(i, builder.getItemStack());
 		}
 
-		this.getCreator().getPlayer().openInventory(this.getMenu());
-		this.getOpponent().getPlayer().openInventory(this.getMenu());
+		this.getCreator().getPlayer().openInventory(this.getCreatorMenu());
+		this.getOpponent().getPlayer().openInventory(this.getOpponentMenu());
 
 		if (this.save()) new AnimationManager().animateMenu(this);
 		else Coinflip.getInstance().colorStr("Cannot save game " + this.getId());
 
 		return true;
     }
+
+	public void setItemForBothMenus(int pos, ItemStack item) {
+		this.getCreatorMenu().setItem(pos, item);
+		this.getOpponentMenu().setItem(pos, item);
+	}
 
     public boolean end() throws IllegalGameEnd, IllegalGameCancellation {
 		if (this.getStatus() != GameStatus.STARTED || this.getWinner() == GameWinner.NONE) throw new IllegalGameEnd("Game is not started or winner is not defined");
